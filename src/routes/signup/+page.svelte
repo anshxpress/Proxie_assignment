@@ -23,9 +23,6 @@
 	let fieldErrors = $state<Partial<Record<keyof SignUpFormData, string>>>({});
 	let successMessage = $state("");
 
-	/**
-	 * Validates a single field and updates field errors
-	 */
 	function validateField(field: keyof SignUpFormData, value: string) {
 		try {
 			// Create partial schema for single field validation
@@ -47,23 +44,18 @@
 		}
 	}
 
-	/**
-	 * Handles form submission with validation
-	 */
 	async function handleSignUp(event: SubmitEvent) {
 		event.preventDefault();
 		error = "";
 		successMessage = "";
 		fieldErrors = {};
 
-		// Validate form data
 		const formData: SignUpFormData = { email, password, confirmPassword };
 
 		try {
 			signUpSchema.parse(formData);
 		} catch (err) {
 			if (err instanceof z.ZodError) {
-				// Map validation errors to field errors
 				err.issues.forEach((e) => {
 					const field = e.path[0] as keyof SignUpFormData;
 					fieldErrors[field] = e.message;
@@ -82,15 +74,12 @@
 
 			if (signUpError) throw signUpError;
 
-			// Show success message
 			successMessage =
 				"Account created successfully! Redirecting to login...";
 
-			// Clear sensitive data
 			password = "";
 			confirmPassword = "";
 
-			// Redirect after a short delay to show success message
 			setTimeout(() => {
 				goto("/login");
 			}, 1500);

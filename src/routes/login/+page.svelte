@@ -24,9 +24,6 @@
 	let fieldErrors = $state<Partial<Record<keyof LoginFormData, string>>>({});
 	let successMessage = $state("");
 
-	/**
-	 * Validates a single field and updates field errors
-	 */
 	function validateField(field: keyof LoginFormData, value: string) {
 		try {
 			const formData: LoginFormData = { email, password };
@@ -42,16 +39,12 @@
 		}
 	}
 
-	/**
-	 * Handles form submission with validation
-	 */
 	async function handleLogin(event: SubmitEvent) {
 		event.preventDefault();
 		error = "";
 		successMessage = "";
 		fieldErrors = {};
 
-		// Validate form data
 		const formData: LoginFormData = { email, password };
 
 		try {
@@ -77,21 +70,16 @@
 
 			if (loginError) throw loginError;
 
-			// Store remember me preference
 			if (rememberMe) {
 				localStorage.setItem("rememberMe", "true");
 			} else {
 				localStorage.removeItem("rememberMe");
 			}
 
-			// Show success message
 			successMessage = "Login successful! Redirecting...";
 
-			// Clear sensitive data
 			password = "";
 
-			// Redirect after a short delay
-			// Redirect immediately
 			window.location.href = "/tasks";
 		} catch (err: any) {
 			error = getAuthErrorMessage(err);

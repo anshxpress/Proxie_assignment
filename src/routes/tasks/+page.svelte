@@ -41,17 +41,14 @@
     let selectedStatus = $state<string>("Pending");
     let searchQuery = $state($page.url.searchParams.get("search") || "");
 
-    // Edit State
     let isEditDialogOpen = $state(false);
     let editingTask = $state<any>(null);
     let editPriority = $state<string>("");
     let editStatus = $state<string>("");
 
-    // Delete State
     let isDeleteDialogOpen = $state(false);
     let deletingTask = $state<any>(null);
 
-    // Reset form state when submission is successful
     $effect(() => {
         if (form?.success) {
             selectedPriority = "";
@@ -95,7 +92,6 @@
 </script>
 
 <div class="container mx-auto py-10 px-4 space-y-8">
-    <!-- Create Task Form -->
     <div class="max-w-2xl mx-auto">
         <Card>
             <CardHeader>
@@ -115,7 +111,6 @@
                     }}
                     class="space-y-6"
                 >
-                    <!-- Title -->
                     <div class="space-y-2">
                         <Label for="title">Title</Label>
                         <Input
@@ -133,7 +128,6 @@
                         {/if}
                     </div>
 
-                    <!-- Description -->
                     <div class="space-y-2">
                         <Label for="description">Description</Label>
                         <Textarea
@@ -151,7 +145,6 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Priority -->
                         <div class="space-y-2">
                             <Label>Priority</Label>
                             <Select.Root
@@ -181,7 +174,6 @@
                             {/if}
                         </div>
 
-                        <!-- Status -->
                         <div class="space-y-2">
                             <Label>Status</Label>
                             <Select.Root
@@ -216,7 +208,6 @@
                         </div>
                     </div>
 
-                    <!-- Due Date -->
                     <div class="space-y-2">
                         <Label for="due_date">Due Date</Label>
                         <Input
@@ -234,7 +225,6 @@
                         {/if}
                     </div>
 
-                    <!-- Error Message -->
                     {#if form?.error}
                         <div
                             class="rounded-md bg-red-50 p-3 text-sm text-red-800"
@@ -243,7 +233,6 @@
                         </div>
                     {/if}
 
-                    <!-- Success Message -->
                     {#if form?.success}
                         <div
                             class="rounded-md bg-green-50 p-3 text-sm text-green-800"
@@ -272,7 +261,6 @@
             <h2 class="text-2xl font-bold">Your Tasks</h2>
 
             <div class="flex flex-wrap gap-2 w-full md:w-auto">
-                <!-- Search -->
                 <div class="relative w-full md:w-64">
                     <Search
                         class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"
@@ -286,7 +274,6 @@
                     />
                 </div>
 
-                <!-- Filter Status -->
                 <DropdownMenu.Root>
                     <DropdownMenu.Trigger>
                         <Button variant="outline" size="icon">
@@ -318,7 +305,6 @@
                     </DropdownMenu.Content>
                 </DropdownMenu.Root>
 
-                <!-- Sort -->
                 <DropdownMenu.Root>
                     <DropdownMenu.Trigger>
                         <Button variant="outline" size="icon">
@@ -499,7 +485,6 @@
     </div>
 </div>
 
-<!-- Edit Dialog -->
 <Dialog.Root bind:open={isEditDialogOpen}>
     <Dialog.Content class="sm:max-w-[425px]">
         <Dialog.Header>
@@ -599,7 +584,6 @@
     </Dialog.Content>
 </Dialog.Root>
 
-<!-- Delete Alert Dialog -->
 <AlertDialog.Root bind:open={isDeleteDialogOpen}>
     <AlertDialog.Content>
         <AlertDialog.Header>

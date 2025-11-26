@@ -21,18 +21,14 @@
         logoutError = "";
 
         try {
-            // Sign out from Supabase
             const { error } = await supabase.auth.signOut();
 
             if (error) throw error;
 
-            // Clear localStorage (remember me preference)
             localStorage.removeItem("rememberMe");
 
-            // Invalidate all data to clear session
             await invalidateAll();
 
-            // Redirect to login
             goto("/login");
         } catch (err: any) {
             logoutError = err.message || "Failed to log out. Please try again.";

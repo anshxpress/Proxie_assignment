@@ -15,19 +15,15 @@ export const handle: Handle = async ({ event, resolve }) => {
         },
     });
 
-    /**
-     * Unlike `supabase.auth.getSession()`, which is unsafe on the server because it
-     * doesn't validate the token, this function validates the token by calling
-     * the user endpoint.
-     */
+
     const {
         data: { user },
     } = await event.locals.supabase.auth.getUser();
 
     event.locals.user = user;
-    event.locals.session = null; // Session is less reliable on server, rely on user. But for compatibility we can try to get it if needed, or just use user.
-    // Actually, getting the session is still useful for some things, but getUser is safer.
-    // Let's stick to the standard pattern.
+    event.locals.session = null;
+
+
     const { data: { session } } = await event.locals.supabase.auth.getSession();
     event.locals.session = session;
 

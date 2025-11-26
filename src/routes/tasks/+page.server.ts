@@ -31,7 +31,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
         query = query.ilike('title', `%${search}%`);
     }
 
-    // Always sort by the requested field, then by created_at as secondary sort for stability
+
     query = query.order(sort, { ascending: sortDirection });
     if (sort !== 'created_at') {
         query = query.order('created_at', { ascending: false });
@@ -64,10 +64,10 @@ export const actions: Actions = {
         const data = Object.fromEntries(formData);
 
         try {
-            // Validate form data
+
             const validatedData = taskSchema.parse(data);
 
-            // Insert into Supabase
+
             const { error } = await locals.supabase.from('tasks').insert({
                 user_id: session.user.id,
                 title: validatedData.title,

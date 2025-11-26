@@ -1,9 +1,6 @@
 import { z } from 'zod';
 
-/**
- * Sign Up Form Validation Schema
- * Validates email, password strength, and password confirmation
- */
+
 export const signUpSchema = z.object({
     email: z
         .string()
@@ -19,10 +16,7 @@ export const signUpSchema = z.object({
     path: ['confirmPassword']
 });
 
-/**
- * Login Form Validation Schema
- * Validates email and password
- */
+
 export const loginSchema = z.object({
     email: z
         .string()
@@ -31,10 +25,7 @@ export const loginSchema = z.object({
     password: z.string().min(1, 'Password is required')
 });
 
-/**
- * Task Form Validation Schema
- * Validates task creation/update fields
- */
+
 export const taskSchema = z.object({
     title: z
         .string()
@@ -51,7 +42,7 @@ export const taskSchema = z.object({
     status: z.enum(['Pending', 'In Progress', 'Completed']).default('Pending')
 });
 
-// Type exports for use in components
+
 export type SignUpFormData = z.infer<typeof signUpSchema>;
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type TaskFormData = z.infer<typeof taskSchema>;

@@ -7,17 +7,11 @@
 
 	let { data, children }: { data: LayoutData; children: any } = $props();
 
-	/**
-	 * Set up auth state listener for session persistence
-	 * This ensures the session stays in sync across tabs and page refreshes
-	 */
 	onMount(() => {
 		// Subscribe to auth state changes
 		const {
 			data: { subscription },
 		} = supabase.auth.onAuthStateChange((event, session) => {
-			// Invalidate all data when auth state changes
-			// This will re-run all load functions and update the UI
 			if (
 				event === "SIGNED_IN" ||
 				event === "SIGNED_OUT" ||
@@ -27,7 +21,6 @@
 			}
 		});
 
-		// Cleanup subscription on component destroy
 		return () => {
 			subscription.unsubscribe();
 		};
