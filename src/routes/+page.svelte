@@ -1,7 +1,6 @@
 <script lang="ts">
-    import { supabase } from "$lib/supabaseClient";
-    import { onMount } from "svelte";
-    import { goto } from "$app/navigation";
+    import type { PageData } from "./$types";
+    import { goto, invalidateAll } from "$app/navigation";
     import {
         Card,
         CardContent,
@@ -10,62 +9,74 @@
         CardTitle,
     } from "$lib/components/ui/card";
     import { Button } from "$lib/components/ui/button";
+    import { supabase } from "$lib/supabaseClient";
 
-    let userEmail = $state<string | null>(null);
-    let loading = $state(true);
+    let { data }: { data: PageData } = $props();
 
-    onMount(async () => {
-        // Check if user is authenticated
-        const {
-            data: { session },
-        } = await supabase.auth.getSession();
-
-        if (!session) {
-            // Redirect to login if not authenticated
-            goto("/login");
-            return;
-        }
-
-        userEmail = session.user.email || null;
-        loading = false;
-    });
+    let loggingOut = $state(false);
+    let logoutError = $state("");
 
     async function handleLogout() {
-        await supabase.auth.signOut();
-        goto("/login");
+        loggingOut = true;
+        logoutError = "";
+
+        try {
+            // Sign out from Supabase
+            const { error } = await supabase.auth.signOut();
+
+            if (error) throw error;
+
+            // Clear localStorage (remember me preference)
+            localStorage.removeItem("rememberMe");
+
+            // Invalidate all data to clear session
+            await invalidateAll();
+
+            // Redirect to login
+            goto("/login");
+        } catch (err: any) {
+            logoutError = err.message || "Failed to log out. Please try again.";
+        } finally {
+            loggingOut = false;
+        }
     }
 </script>
 
-{#if loading}
-    <div class="flex min-h-screen items-center justify-center bg-gray-50">
-        <p class="text-gray-600">Loading...</p>
-    </div>
-{:else}
-    <div class="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-        <Card class="w-full max-w-md">
-            <CardHeader>
-                <CardTitle>Welcome to Task Manager!</CardTitle>
-                <CardDescription>You're successfully logged in</CardDescription>
-            </CardHeader>
-            <CardContent class="space-y-4">
-                <div class="rounded-md bg-green-50 p-4">
-                    <p class="text-sm text-green-800">
-                        <strong>Logged in as:</strong>
-                        {userEmail}
-                    </p>
-                </div>
+<div class="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+    <Card class="w-full max-w-md">
+        <CardHeader>
+            <CardTitle>Welcome to Task Manager!</CardTitle>
+            <CardDescription>You're successfully logged in</CardDescription>
+        </CardHeader>
+        <CardContent class="space-y-4">
+            <div class="rounded-md bg-green-50 p-4">
+                <p class="text-sm text-green-800">
+                    <strong>Logged in as:</strong>
+                    {data.user?.email || "Unknown"}
+                </p>
+            </div>
 
-                <div class="space-y-2">
-                    <p class="text-sm text-gray-600">
-                        This is a placeholder home page. Task management
-                        features will be added in Day 4-6.
-                    </p>
-                </div>
+            <div class="space-y-2">
+                <p class="text-sm text-gray-600">
+                    This is a placeholder home page. Task management features
+                    will be added in Day 4-6.
+                </p>
+            </div>
 
-                <Button onclick={handleLogout} variant="outline" class="w-full">
-                    Log Out
-                </Button>
-            </CardContent>
-        </Card>
-    </div>
-{/if}
+            {#if logoutError}
+                <div class="rounded-md bg-red-50 p-3 text-sm text-red-800">
+                    {logoutError}
+                </div>
+            {/if}
+
+            <Button
+                onclick={handleLogout}
+                variant="outline"
+                class="w-full"
+                disabled={loggingOut}
+            >
+                {loggingOut ? "Logging out..." : "Log Out"}
+            </Button>
+        </CardContent>
+    </Card>
+</div>
