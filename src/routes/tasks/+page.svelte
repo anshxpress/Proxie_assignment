@@ -17,6 +17,8 @@
     } from "$lib/components/ui/card";
     import * as Select from "$lib/components/ui/select";
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
+    import * as Dialog from "$lib/components/ui/dialog";
+    import * as AlertDialog from "$lib/components/ui/alert-dialog";
     import { formatDate, getPriorityColor, getStatusColor } from "$lib/utils";
     import {
         Search,
@@ -24,6 +26,11 @@
         ArrowUpDown,
         Calendar,
         Clock,
+        MoreHorizontal,
+        Pencil,
+        Trash2,
+        CheckCircle,
+        XCircle,
     } from "lucide-svelte";
     import type { ActionData, PageData } from "./$types";
 
@@ -34,11 +41,29 @@
     let selectedStatus = $state<string>("Pending");
     let searchQuery = $state($page.url.searchParams.get("search") || "");
 
+    // Edit State
+    let isEditDialogOpen = $state(false);
+    let editingTask = $state<any>(null);
+    let editPriority = $state<string>("");
+    let editStatus = $state<string>("");
+
+    // Delete State
+    let isDeleteDialogOpen = $state(false);
+    let deletingTask = $state<any>(null);
+
     // Reset form state when submission is successful
     $effect(() => {
         if (form?.success) {
             selectedPriority = "";
             selectedStatus = "Pending";
+            if (isEditDialogOpen) {
+                isEditDialogOpen = false;
+                editingTask = null;
+            }
+            if (isDeleteDialogOpen) {
+                isDeleteDialogOpen = false;
+                deletingTask = null;
+            }
         }
     });
 
@@ -54,6 +79,18 @@
 
     function handleSearch() {
         updateParams("search", searchQuery);
+    }
+
+    function openEditDialog(task: any) {
+        editingTask = task;
+        editPriority = task.priority;
+        editStatus = task.status;
+        isEditDialogOpen = true;
+    }
+
+    function openDeleteDialog(task: any) {
+        deletingTask = task;
+        isDeleteDialogOpen = true;
     }
 </script>
 
@@ -346,21 +383,50 @@
         {:else}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {#each data.tasks as task (task.id)}
-                    <Card class="flex flex-col h-full">
+                    <Card class="flex flex-col h-full relative group">
                         <CardHeader>
                             <div class="flex justify-between items-start gap-2">
-                                <Badge
-                                    class={getPriorityColor(task.priority)}
-                                    variant="outline"
-                                >
-                                    {task.priority}
-                                </Badge>
-                                <Badge
-                                    class={getStatusColor(task.status)}
-                                    variant="outline"
-                                >
-                                    {task.status}
-                                </Badge>
+                                <div class="flex gap-2">
+                                    <Badge
+                                        class={getPriorityColor(task.priority)}
+                                        variant="outline"
+                                    >
+                                        {task.priority}
+                                    </Badge>
+                                    <Badge
+                                        class={getStatusColor(task.status)}
+                                        variant="outline"
+                                    >
+                                        {task.status}
+                                    </Badge>
+                                </div>
+                                <DropdownMenu.Root>
+                                    <DropdownMenu.Trigger>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            class="h-8 w-8"
+                                        >
+                                            <MoreHorizontal class="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenu.Trigger>
+                                    <DropdownMenu.Content>
+                                        <DropdownMenu.Item
+                                            onclick={() => openEditDialog(task)}
+                                        >
+                                            <Pencil class="mr-2 h-4 w-4" />
+                                            Edit
+                                        </DropdownMenu.Item>
+                                        <DropdownMenu.Item
+                                            class="text-red-600"
+                                            onclick={() =>
+                                                openDeleteDialog(task)}
+                                        >
+                                            <Trash2 class="mr-2 h-4 w-4" />
+                                            Delete
+                                        </DropdownMenu.Item>
+                                    </DropdownMenu.Content>
+                                </DropdownMenu.Root>
                             </div>
                             <CardTitle class="mt-2 line-clamp-2"
                                 >{task.title}</CardTitle
@@ -386,9 +452,45 @@
                             {/if}
                         </CardContent>
                         <CardFooter
-                            class="text-xs text-gray-400 border-t pt-4 mt-auto"
+                            class="flex justify-between items-center border-t pt-4 mt-auto"
                         >
-                            Created {formatDate(task.created_at)}
+                            <span class="text-xs text-gray-400"
+                                >Created {formatDate(task.created_at)}</span
+                            >
+                            <form
+                                method="POST"
+                                action="?/toggleStatus"
+                                use:enhance
+                            >
+                                <input
+                                    type="hidden"
+                                    name="id"
+                                    value={task.id}
+                                />
+                                <input
+                                    type="hidden"
+                                    name="currentStatus"
+                                    value={task.status}
+                                />
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    type="submit"
+                                    title={task.status === "Completed"
+                                        ? "Mark Incomplete"
+                                        : "Mark Complete"}
+                                >
+                                    {#if task.status === "Completed"}
+                                        <XCircle
+                                            class="h-4 w-4 text-gray-500"
+                                        />
+                                    {:else}
+                                        <CheckCircle
+                                            class="h-4 w-4 text-green-600"
+                                        />
+                                    {/if}
+                                </Button>
+                            </form>
                         </CardFooter>
                     </Card>
                 {/each}
@@ -396,3 +498,127 @@
         {/if}
     </div>
 </div>
+
+<!-- Edit Dialog -->
+<Dialog.Root bind:open={isEditDialogOpen}>
+    <Dialog.Content class="sm:max-w-[425px]">
+        <Dialog.Header>
+            <Dialog.Title>Edit Task</Dialog.Title>
+            <Dialog.Description>
+                Make changes to your task here. Click save when you're done.
+            </Dialog.Description>
+        </Dialog.Header>
+        {#if editingTask}
+            <form
+                method="POST"
+                action="?/update"
+                use:enhance={() => {
+                    loading = true;
+                    return async ({ update }) => {
+                        loading = false;
+                        await update();
+                    };
+                }}
+                class="space-y-4"
+            >
+                <input type="hidden" name="id" value={editingTask.id} />
+                <div class="space-y-2">
+                    <Label for="edit-title">Title</Label>
+                    <Input
+                        id="edit-title"
+                        name="title"
+                        value={editingTask.title}
+                        required
+                    />
+                </div>
+                <div class="space-y-2">
+                    <Label for="edit-description">Description</Label>
+                    <Textarea
+                        id="edit-description"
+                        name="description"
+                        value={editingTask.description}
+                    />
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <Label>Priority</Label>
+                        <Select.Root type="single" bind:value={editPriority}>
+                            <Select.Trigger>
+                                {editPriority || editingTask.priority}
+                            </Select.Trigger>
+                            <Select.Content>
+                                <Select.Item value="Low">Low</Select.Item>
+                                <Select.Item value="Medium">Medium</Select.Item>
+                                <Select.Item value="High">High</Select.Item>
+                            </Select.Content>
+                        </Select.Root>
+                        <input
+                            type="hidden"
+                            name="priority"
+                            value={editPriority}
+                        />
+                    </div>
+                    <div class="space-y-2">
+                        <Label>Status</Label>
+                        <Select.Root type="single" bind:value={editStatus}>
+                            <Select.Trigger>
+                                {editStatus || editingTask.status}
+                            </Select.Trigger>
+                            <Select.Content>
+                                <Select.Item value="Pending"
+                                    >Pending</Select.Item
+                                >
+                                <Select.Item value="In Progress"
+                                    >In Progress</Select.Item
+                                >
+                                <Select.Item value="Completed"
+                                    >Completed</Select.Item
+                                >
+                            </Select.Content>
+                        </Select.Root>
+                        <input type="hidden" name="status" value={editStatus} />
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <Label for="edit-due-date">Due Date</Label>
+                    <Input
+                        id="edit-due-date"
+                        name="due_date"
+                        type="date"
+                        value={editingTask.due_date}
+                        required
+                    />
+                </div>
+                <Dialog.Footer>
+                    <Button type="submit" disabled={loading}
+                        >Save changes</Button
+                    >
+                </Dialog.Footer>
+            </form>
+        {/if}
+    </Dialog.Content>
+</Dialog.Root>
+
+<!-- Delete Alert Dialog -->
+<AlertDialog.Root bind:open={isDeleteDialogOpen}>
+    <AlertDialog.Content>
+        <AlertDialog.Header>
+            <AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
+            <AlertDialog.Description>
+                This action cannot be undone. This will permanently delete the
+                task "{deletingTask?.title}".
+            </AlertDialog.Description>
+        </AlertDialog.Header>
+        <AlertDialog.Footer>
+            <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+            <form method="POST" action="?/delete" use:enhance>
+                <input type="hidden" name="id" value={deletingTask?.id} />
+                <AlertDialog.Action
+                    type="submit"
+                    class="bg-red-600 hover:bg-red-700"
+                    >Delete</AlertDialog.Action
+                >
+            </form>
+        </AlertDialog.Footer>
+    </AlertDialog.Content>
+</AlertDialog.Root>

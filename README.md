@@ -8,21 +8,31 @@ A modern, full-stack task management application built with SvelteKit, Supabase,
 
 ## ✨ Features Implemented (Days 1-2)
 
-### Authentication System
-- ✅ **Sign Up**: Email/password registration with validation
-- ✅ **Login**: Secure authentication with "Remember me" option
-- ✅ **Form Validation**: Real-time validation with Zod
-- ✅ **Error Handling**: User-friendly error messages
-- ✅ **Session Management**: Persistent sessions with Supabase
-- ✅ **Protected Routes**: Authentication checks on protected pages
+## Features
 
-### User Experience
-- ✅ Real-time field validation (validates on blur)
-- ✅ Field-specific error messages
-- ✅ Loading states to prevent double submission
-- ✅ Success notifications before redirects
-- ✅ Password strength hints
-- ✅ Responsive design with Tailwind CSS
+- **Authentication**
+  - Sign Up with Email/Password
+  - Login with "Remember Me"
+  - Protected Routes (Server-side middleware)
+  - Secure Logout
+
+- **Task Management**
+  - **Create**: Add tasks with title, description, priority, due date, and status.
+  - **Read**: View tasks in a responsive grid layout.
+  - **Update**: Edit task details via a modal dialog.
+  - **Delete**: Remove tasks with a confirmation prompt.
+  - **Quick Actions**: Toggle task status directly from the card.
+
+- **Organization & Search**
+  - **Search**: Real-time filtering by task title.
+  - **Filter**: Filter tasks by Status (Pending, In Progress, Completed).
+  - **Sort**: Sort by Due Date, Created Date, or Priority (Asc/Desc).
+
+- **UI/UX**
+  - Modern, clean interface using `shadcn-svelte`.
+  - Responsive design for mobile, tablet, and desktop.
+  - Loading states for smooth interactions.
+  - Form validation with `zod`.
 - ✅ Beautiful UI with shadcn-svelte components
 
 ## 🛠️ Tech Stack

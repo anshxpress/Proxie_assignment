@@ -99,5 +99,80 @@ export const actions: Actions = {
                 data
             });
         }
+    },
+
+    update: async ({ request, locals }) => {
+        const session = locals.session;
+        if (!session) return fail(401, { message: 'Unauthorized' });
+
+        const formData = await request.formData();
+        const id = formData.get('id') as string;
+        const data = Object.fromEntries(formData);
+
+        try {
+            const validatedData = taskSchema.parse(data);
+
+            const { error } = await locals.supabase
+                .from('tasks')
+                .update({
+                    title: validatedData.title,
+                    description: validatedData.description || null,
+                    priority: validatedData.priority,
+                    due_date: validatedData.due_date,
+                    status: validatedData.status,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', id)
+                .eq('user_id', session.user.id);
+
+            if (error) throw error;
+
+            return { success: true, message: 'Task updated successfully' };
+        } catch (err) {
+            if (err instanceof ZodError) {
+                const errors = err.flatten().fieldErrors;
+                return fail(400, { error: 'Validation Error', errors, data });
+            }
+            return fail(500, { message: 'Failed to update task' });
+        }
+    },
+
+    delete: async ({ request, locals }) => {
+        const session = locals.session;
+        if (!session) return fail(401, { message: 'Unauthorized' });
+
+        const formData = await request.formData();
+        const id = formData.get('id') as string;
+
+        const { error } = await locals.supabase
+            .from('tasks')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', session.user.id);
+
+        if (error) return fail(500, { message: 'Failed to delete task' });
+
+        return { success: true, message: 'Task deleted successfully' };
+    },
+
+    toggleStatus: async ({ request, locals }) => {
+        const session = locals.session;
+        if (!session) return fail(401, { message: 'Unauthorized' });
+
+        const formData = await request.formData();
+        const id = formData.get('id') as string;
+        const currentStatus = formData.get('currentStatus') as string;
+
+        const newStatus = currentStatus === 'Completed' ? 'Pending' : 'Completed';
+
+        const { error } = await locals.supabase
+            .from('tasks')
+            .update({ status: newStatus, updated_at: new Date().toISOString() })
+            .eq('id', id)
+            .eq('user_id', session.user.id);
+
+        if (error) return fail(500, { message: 'Failed to update status' });
+
+        return { success: true, message: 'Task status updated' };
     }
 };
