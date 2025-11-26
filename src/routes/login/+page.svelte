@@ -34,7 +34,7 @@
 			fieldErrors[field] = "";
 		} catch (err) {
 			if (err instanceof z.ZodError) {
-				const fieldError = err.errors.find((e) => e.path[0] === field);
+				const fieldError = err.issues.find((e) => e.path[0] === field);
 				if (fieldError) {
 					fieldErrors[field] = fieldError.message;
 				}
@@ -58,7 +58,7 @@
 			loginSchema.parse(formData);
 		} catch (err) {
 			if (err instanceof z.ZodError) {
-				err.errors.forEach((e) => {
+				err.issues.forEach((e) => {
 					const field = e.path[0] as keyof LoginFormData;
 					fieldErrors[field] = e.message;
 				});
@@ -91,9 +91,8 @@
 			password = "";
 
 			// Redirect after a short delay
-			setTimeout(() => {
-				goto("/");
-			}, 1000);
+			// Redirect immediately
+			window.location.href = "/tasks";
 		} catch (err: any) {
 			error = getAuthErrorMessage(err);
 		} finally {

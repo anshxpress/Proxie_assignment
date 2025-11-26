@@ -39,7 +39,7 @@
 			fieldErrors[field] = "";
 		} catch (err) {
 			if (err instanceof z.ZodError) {
-				const fieldError = err.errors.find((e) => e.path[0] === field);
+				const fieldError = err.issues.find((e) => e.path[0] === field);
 				if (fieldError) {
 					fieldErrors[field] = fieldError.message;
 				}
@@ -64,7 +64,7 @@
 		} catch (err) {
 			if (err instanceof z.ZodError) {
 				// Map validation errors to field errors
-				err.errors.forEach((e) => {
+				err.issues.forEach((e) => {
 					const field = e.path[0] as keyof SignUpFormData;
 					fieldErrors[field] = e.message;
 				});

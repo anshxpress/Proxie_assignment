@@ -7,6 +7,7 @@ declare global {
 		interface Locals {
 			supabase: SupabaseClient;
 			session: Session | null;
+			user: import("@supabase/supabase-js").User | null;
 		}
 		interface PageData {
 			session: Session | null;

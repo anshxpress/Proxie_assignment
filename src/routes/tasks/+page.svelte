@@ -31,7 +31,7 @@
         Trash2,
         CheckCircle,
         XCircle,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import type { ActionData, PageData } from "./$types";
 
     let { data, form } = $props<{ data: PageData; form: ActionData }>();

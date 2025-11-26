@@ -58,9 +58,12 @@
 
             <div class="space-y-4">
                 <p class="text-sm text-gray-600">
-                    Start managing your tasks by creating a new one.
+                    Manage your tasks, track progress, and stay organized.
                 </p>
-                <Button href="/tasks" class="w-full">Create New Task</Button>
+                <div class="flex gap-3">
+                    <Button href="/tasks" class="w-full">Go to Dashboard</Button
+                    >
+                </div>
             </div>
 
             {#if logoutError}
