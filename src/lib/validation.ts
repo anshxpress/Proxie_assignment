@@ -31,6 +31,27 @@ export const loginSchema = z.object({
     password: z.string().min(1, 'Password is required')
 });
 
+/**
+ * Task Form Validation Schema
+ * Validates task creation/update fields
+ */
+export const taskSchema = z.object({
+    title: z
+        .string()
+        .min(1, 'Title is required')
+        .max(100, 'Title must be 100 characters or less'),
+    description: z
+        .string()
+        .max(500, 'Description must be 500 characters or less')
+        .optional(),
+    priority: z.enum(['Low', 'Medium', 'High'], {
+        message: 'Please select a priority level'
+    }),
+    due_date: z.string().min(1, 'Due date is required'),
+    status: z.enum(['Pending', 'In Progress', 'Completed']).default('Pending')
+});
+
 // Type exports for use in components
 export type SignUpFormData = z.infer<typeof signUpSchema>;
 export type LoginFormData = z.infer<typeof loginSchema>;
+export type TaskFormData = z.infer<typeof taskSchema>;

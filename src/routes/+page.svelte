@@ -56,11 +56,11 @@
                 </p>
             </div>
 
-            <div class="space-y-2">
+            <div class="space-y-4">
                 <p class="text-sm text-gray-600">
-                    This is a placeholder home page. Task management features
-                    will be added in Day 4-6.
+                    Start managing your tasks by creating a new one.
                 </p>
+                <Button href="/tasks" class="w-full">Create New Task</Button>
             </div>
 
             {#if logoutError}
