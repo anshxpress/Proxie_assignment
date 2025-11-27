@@ -80,7 +80,7 @@ Log in to your Supabase account and run the SQL script from `schema.sql` in the 
 ### 5. Run the Application
 
 ```bash
-pnpm run dev
+npm run dev
 ```
 
 The application will be available at http://localhost:5173.
